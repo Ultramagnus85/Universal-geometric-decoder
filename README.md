@@ -44,6 +44,10 @@ This system operates purely through derivation. Every method, module, and output
 
 ---
 
-## ✍️ Authored by Robby
+## ✍️ Authored by Robert E Quarles 
 
 Mathematical Framework Architect specializing in dimensional integrity, recursive optimization, and cross-domain symbolic decoding.
+## 🧪 Try the Simulator
+
+👉 Launch the Universal Geometric Decoder here:  
+[🔷 Click to open the HTML simulation](https://Ultramagnus85.github.io/Universal-Geometric-Decoder)
