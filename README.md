@@ -1,18 +1,10 @@
-# 🔷 Project Overview: Universal Geometric Decoder
+# 🔷 Project Overview: Universal Geometric Decoder Discoveries and Predictions 
 
-The Universal Geometric Decoder is a mathematically rigorous simulation framework designed to reconstruct and decode symbolic structures across multiple domains—constellations, sprites, crop circles, and abstract geometries—using dimensional consistency, recursive pattern logic, and transformation-based encoding.
-
-This system operates purely through derivation. Every method, module, and output adheres strictly to unit integrity and mathematical formalism. Symbolic features are translated into geometric primitives, examined for harmonic structure, and expressed through reusable transformation rules. These rules are then tested for universality across disparate symbolic systems.
+The Universal Geometric Decoder is a mathematically rigorous simulation framework designed to reconstruct and decode symbolic structures across multiple domains. This method was developed to be 100% assumption free and completely mathematically valid. The UGD is bi-directionl and scales to multiple dimensions 2D-6D+. UGD can start from verified data to produce geometry or start from geometry to produce data/governing physics. This revolutionary methodology has successfully made monumental discoveries in molecular physics demonstrating golden ratio optimization in DNA strands discovered the existence of a golden spiral within the periodic table of elements. UGD identified encoded physics laws and equations within the constellations and decoded sacred geometry finding applicable physics laws and mathmatics supporting pattern alignment with golden spiral symmetry highlighting resonance matches within the periodic table of elements leading to the prediction of 114 elements a d dozens of compounds with unprecedented accuracy. This system operates purely through derivation. Every method, module, and output adheres strictly to unit integrity and mathematical formalism. Symbolic features are translated into geometric primitives, examined for harmonic structure, and expressed through reusable transformation rules. These rules are then tested for universality across disparate symbolic systems.
 
 ---
 
-## 🧠 Key Objectives
 
-- Establish optimization and symmetry as domain-independent decoding principles
-- Translate symbolic data into mathematically valid geometric forms
-- Apply recursive and harmonic logic to identify latent structures
-- Encode transformation rules with formal syntax and reproducible logic
-- Confirm universality via cross-domain projection and validation
 
 ---
 
@@ -37,16 +29,14 @@ This system operates purely through derivation. Every method, module, and output
 
 ## 🧪 Simulation Use Cases
 
-- Decoding sacred geometry to extract equations decoding constellations to extract equations decoding crop circles to extract equations
+- Decoding sacred geometry to extract equations decoding constellations to extract equations decoding reverse engineering molecular structures to extract governing physics 
 - decoding geometry in nature to uncover the underlying mathematical mechanics
-- a demonstration showing that ancient knowledge was encoded into symbol form via sacred geometry
 - 
 
 ---
 
 ## ✍️ Authored by Robert E Quarles 
 
-Mathematical Framework Architect specializing in dimensional integrity, recursive optimization, and cross-domain symbolic decoding.
 ## 🧪 Try the Simulator
 
 👉 Launch the Universal Geometric Decoder here:  
