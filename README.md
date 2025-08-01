@@ -40,4 +40,4 @@ The Universal Geometric Decoder is a mathematically rigorous simulation framewor
 ## 🧪 Try the Simulator
 
 👉 Launch the Universal Geometric Decoder here:  
-[🔷 Click to open the HTML simulation](https://Ultramagnus85.github.io/Universal-Geometric-Decoder)
+[🔷 Click to open the HTML simulation](https://ultramagnus85.github.io/Universal-geometric-decoder)
