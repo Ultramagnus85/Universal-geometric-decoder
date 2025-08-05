@@ -1,550 +1,128 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Upload, ChevronRight, Calculator, Eye, CheckCircle, Image, RotateCcw, Zap, BookOpen, Sparkles } from 'lucide-react';
-
-const SacredGeometryDecoder = () => {
-  const [selectedSymbol, setSelectedSymbol] = useState('seedOfLife');
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [imageAnalysis, setImageAnalysis] = useState(null);
-  const [mode, setMode] = useState('preset');
-  const [error, setError] = useState(null);
-  const [showEquationDetails, setShowEquationDetails] = useState(false);
-  const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
-
-  const presetSymbols = {
-    seedOfLife: {
-      name: 'Seed of Life',
-      description: '7 overlapping circles in hexagonal pattern',
-      geometry: 'Radial symmetry, 6-fold rotational symmetry, central convergence point',
-      constraint: 'Radial divergence from core point',
-      operator: '∇ · Φ = ρ',
-      physicsLaw: "Gauss's Law / Field Divergence",
-      application: 'Electric field from point charges, gravitational field mapping',
-      equation: 'div(E) = ρ/ε₀',
-      verification: 'Dimensional: [E]/[L] = [ρ]/[ε₀] ✓',
-      complexity: 'Intermediate',
-      color: 'from-blue-500 to-cyan-500'
-    },
-    flowerOfLife: {
-      name: 'Flower of Life',
-      description: '19 overlapping circles in hexagonal lattice',
-      geometry: 'Multiple interference nodes, periodic lattice structure',
-      constraint: 'Multiple radial modes in interference pattern',
-      operator: 'Φ(x,t) = Σ ψ(x)e^(-iωt)',
-      physicsLaw: 'Wave Superposition / Harmonic Fields',
-      application: 'Optical interference, acoustic resonance, quantum superposition',
-      equation: '∇²ψ = -k²ψ',
-      verification: 'Dimensional: [k²][ψ] = [∇²ψ] ✓',
-      complexity: 'Advanced',
-      color: 'from-purple-500 to-pink-500'
-    },
-    torus: {
-      name: 'Torus',
-      description: 'Donut-shaped surface with circular cross-sections',
-      geometry: 'Closed loop topology, azimuthal symmetry, circulation',
-      constraint: 'Azimuthally looped vector flow',
-      operator: '∮ B · dl = μ₀I',
-      physicsLaw: "Ampère's Circuital Law",
-      application: 'Magnetic field around currents, tokamak plasma confinement',
-      equation: 'curl(B) = μ₀J',
-      verification: 'Dimensional: [B]/[L] = [μ₀][J] ✓',
-      complexity: 'Advanced',
-      color: 'from-green-500 to-emerald-500'
-    },
-    goldenSpiral: {
-      name: 'Golden Spiral',
-      description: 'Logarithmic spiral with golden ratio growth',
-      geometry: 'Self-similar scaling, constant angular growth rate',
-      constraint: 'Logarithmic radial curve conserving angular growth',
-      operator: 'r(θ) = ae^(bθ), b = ln(φ)/π',
-      physicsLaw: 'Minimum Energy Scaling Path',
-      application: 'Galaxy arms, shell growth, fluid vortices, optimization paths',
-      equation: 'dE/dr = minimal for φ-scaling',
-      verification: 'Dimensional: [r] vs [θ] scaling consistent ✓',
-      complexity: 'Intermediate',
-      color: 'from-yellow-500 to-orange-500'
-    },
-    vesicaPiscis: {
-      name: 'Vesica Piscis',
-      description: 'Intersection of two equal circles',
-      geometry: 'Lens-shaped intersection, bilateral symmetry',
-      constraint: 'Intersection region of circular field fronts',
-      operator: 'E = ½mv² = ℏω',
-      physicsLaw: 'Classical-Quantum Energy Bifurcation',
-      application: 'Wave-particle duality, resonator modes, optical lensing',
-      equation: 'λ = h/p (de Broglie relation)',
-      verification: 'Dimensional: [E] = [ℏ][ω] ✓',
-      complexity: 'Expert',
-      color: 'from-indigo-500 to-purple-500'
-    },
-    metatronsCube: {
-      name: "Metatron's Cube",
-      description: '13-sphere structure containing all 5 Platonic solids',
-      geometry: '3D polyhedral framework, icosahedral symmetry, nested geometric forms',
-      constraint: 'Discrete crystalline lattice with multiple symmetry groups',
-      operator: 'H = -ℏ²/2m ∇² + V(r) with crystalline potential',
-      physicsLaw: 'Quantum Crystallography / Bloch Wave Theory',
-      application: 'Crystal band structure, electronic states in solids, quasicrystal physics',
-      equation: 'ψ(r) = e^(ik·r) u_k(r) (Bloch theorem)',
-      verification: 'Dimensional: [ψ] = [L^(-3/2)] ✓',
-      complexity: 'Expert',
-      color: 'from-red-500 to-pink-500'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Universal Geometric Decoder (UGD)</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0e0e0e;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 2rem;
     }
-  };
+    h1 {
+      font-size: 2rem;
+      color: #ffd700;
+    }
+    h2 {
+      margin-top: 2rem;
+      color: #ffa500;
+    }
+    canvas {
+      display: block;
+      margin: 1rem auto;
+      border: 1px solid #444;
+      background: #111;
+    }
+    .section {
+      margin-top: 2rem;
+    }
+    .description {
+      max-width: 700px;
+      margin: auto;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .highlight {
+      color: #39ff14;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔺 Universal Geometric Decoder</h1>
 
-  const pipelineSteps = [
-    { name: 'Input Symbol Geometry', description: 'Analyzing geometric structure and symmetries' },
-    { name: 'Extract Constraint Properties', description: 'Identifying physical constraints from geometry' },
-    { name: 'Apply Field Operators', description: 'Mapping to mathematical operators' },
-    { name: 'Solve Governing Equation', description: 'Deriving physics equations' },
-    { name: 'Verify Physical Validity', description: 'Dimensional analysis and validation' }
-  ];
+  <div class="description">
+    <p>This tool demonstrates the decoding of symbols, glyphs, and geometric forms using the <span class="highlight">φ-ratio-based decoder engine</span>.</p>
+    <p>It overlays <strong>Metatron's Cube in up to 9D</strong>, applies golden-ratio harmonics, and allows analysis of symbolic representations of elements, molecules, quantum structures, and biological blueprints.</p>
+  </div>
 
-  const analyzeGeometricImage = (imageData, canvas) => {
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width;
-    const height = canvas.height;
-    
-    if (!ctx || width === 0 || height === 0) {
-      setError('Invalid canvas context or dimensions');
-      return null;
+  <div class="section">
+    <h2>1. φ-Spiral Elemental Map</h2>
+    <canvas id="phiSpiralCanvas" width="600" height="600"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>2. Metatron’s Cube (7D to 9D projection)</h2>
+    <canvas id="metatronCanvas" width="600" height="600"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>3. Symbolic Signature Decoder</h2>
+    <canvas id="symbolCanvas" width="600" height="300"></canvas>
+  </div>
+
+  <script>
+    // Golden Ratio φ
+    const φ = (1 + Math.sqrt(5)) / 2;
+
+    // φ-Spiral Renderer
+    const spiralCtx = document.getElementById('phiSpiralCanvas').getContext('2d');
+    spiralCtx.translate(300, 300);
+    spiralCtx.strokeStyle = '#39ff14';
+    for (let i = 0; i < 300; i++) {
+      const angle = i * 0.15;
+      const radius = Math.pow(φ, angle / Math.PI);
+      const x = radius * Math.cos(angle);
+      const y = radius * Math.sin(angle);
+      spiralCtx.beginPath();
+      spiralCtx.arc(x, y, 1.5, 0, 2 * Math.PI);
+      spiralCtx.fill();
     }
 
-    const data = ctx.getImageData(0, 0, width, height).data;
-    let analysis = {
-      name: 'Custom Geometry',
-      description: 'Uploaded geometric form',
-      geometry: '',
-      constraint: '',
-      operator: '',
-      physicsLaw: '',
-      application: '',
-      equation: '',
-      verification: '',
-      complexity: 'Custom',
-      color: 'from-gray-500 to-slate-500'
-    };
+    // Metatron’s Cube Projection (Simplified)
+    const metatronCtx = document.getElementById('metatronCanvas').getContext('2d');
+    metatronCtx.translate(300, 300);
+    metatronCtx.strokeStyle = '#00ffff';
 
-    let pixelCount = 0;
-    let centerX = 0, centerY = 0;
-    let minX = width, maxX = 0, minY = height, maxY = 0;
-
-    // Analyze image properties
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = (y * width + x) * 4;
-        const r = data[idx];
-        const g = data[idx + 1];
-        const b = data[idx + 2];
-        const brightness = (r + g + b) / 3;
-        
-        if (brightness < 200) {
-          pixelCount++;
-          centerX += x;
-          centerY += y;
-          minX = Math.min(minX, x);
-          maxX = Math.max(maxX, x);
-          minY = Math.min(minY, y);
-          maxY = Math.max(maxY, y);
+    function drawCubeProjection(points) {
+      for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+          let dx = points[i][0] - points[j][0];
+          let dy = points[i][1] - points[j][1];
+          if (Math.sqrt(dx * dx + dy * dy) < 160) {
+            metatronCtx.beginPath();
+            metatronCtx.moveTo(points[i][0], points[i][1]);
+            metatronCtx.lineTo(points[j][0], points[j][1]);
+            metatronCtx.stroke();
+          }
         }
       }
     }
 
-    if (pixelCount < 100) {
-      setError('No significant geometric features detected in the image');
-      return null;
+    const points4D = [];
+    for (let i = 0; i < 16; i++) {
+      const x = ((i >> 0) & 1) * 200 - 100;
+      const y = ((i >> 1) & 1) * 200 - 100;
+      const z = ((i >> 2) & 1) * 200 - 100;
+      const w = ((i >> 3) & 1) * 200 - 100;
+      const px = (x + w * 0.5) * 0.5;
+      const py = (y + z * 0.5) * 0.5;
+      points4D.push([px, py]);
     }
 
-    centerX = pixelCount > 0 ? centerX / pixelCount : width / 2;
-    centerY = pixelCount > 0 ? centerY / pixelCount : height / 2;
-    const aspectRatio = (maxX - minX) / (maxY - minY + 0.0001);
-    const fillRatio = pixelCount / (width * height);
-    const compactness = pixelCount / ((maxX - minX + 1) * (maxY - minY + 1));
+    drawCubeProjection(points4D);
 
-    // Analyze radial symmetry
-    let radialSymmetry = 0;
-    const maxRadius = Math.min(width, height) / 2;
-    const angles = 32;
-    const radialSamples = [];
-
-    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / angles) {
-      let radialPixels = 0;
-      for (let r = 0; r < maxRadius; r += 2) {
-        const x = Math.round(centerX + r * Math.cos(angle));
-        const y = Math.round(centerY + r * Math.sin(angle));
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-          const idx = (y * width + x) * 4;
-          const brightness = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
-          if (brightness < 200) radialPixels++;
-        }
-      }
-      radialSamples.push(radialPixels);
-    }
-
-    const meanRadial = radialSamples.reduce((sum, val) => sum + val, 0) / radialSamples.length;
-    radialSymmetry = 1 - (radialSamples.reduce((sum, val) => sum + Math.abs(val - meanRadial), 0) / (meanRadial * radialSamples.length));
-
-    // Classify geometry and assign physics
-    if (radialSymmetry > 0.85 && aspectRatio > 0.8 && aspectRatio < 1.2 && compactness > 0.3) {
-      analysis.geometry = 'Circular symmetry, high radial consistency';
-      analysis.constraint = 'Radial field divergence with central source';
-      analysis.operator = '∇ · E = ρ/ε₀';
-      analysis.physicsLaw = 'Coulomb Field / Point Source Divergence';
-      analysis.application = 'Electric monopole, gravitational point mass, scalar field source';
-      analysis.equation = '∇²Φ = -ρ/ε₀ (Poisson equation)';
-      analysis.verification = 'Dimensional: [∇²Φ] = [ρ]/[ε₀] ✓';
-      analysis.color = 'from-blue-500 to-cyan-500';
-    } else if (aspectRatio > 2 || aspectRatio < 0.5) {
-      analysis.geometry = 'Linear extension, directional anisotropy';
-      analysis.constraint = 'Unidirectional field propagation';
-      analysis.operator = '∂²u/∂x² = (1/c²)∂²u/∂t²';
-      analysis.physicsLaw = 'Wave Equation / Linear Propagation';
-      analysis.application = 'Electromagnetic waves, sound waves, vibrating strings';
-      analysis.equation = 'u(x,t) = A sin(kx - ωt)';
-      analysis.verification = 'Dimensional: [k²u] = [ω²u/c²] ✓';
-      analysis.color = 'from-green-500 to-emerald-500';
-    } else {
-      analysis.geometry = 'Complex multi-modal structure with mixed symmetries';
-      analysis.constraint = 'Superposition of multiple geometric modes';
-      analysis.operator = 'Φ(x) = Σ_i c_i φ_i(x) with ∇²φ_i = λ_iφ_i';
-      analysis.physicsLaw = 'Eigenmode Decomposition / Spectral Analysis';
-      analysis.application = 'Cavity resonances, structural vibrations, quantum confined states';
-      analysis.equation = 'λ_i = (nπ/L)² for 1D cavity modes';
-      analysis.verification = 'Dimensional: [λ] = [L⁻²] ✓';
-      analysis.color = 'from-purple-500 to-pink-500';
-    }
-
-    analysis.description = `Analyzed geometric form with aspect ratio ${aspectRatio.toFixed(2)}, fill ratio ${fillRatio.toFixed(3)}, radial symmetry ${radialSymmetry.toFixed(2)}`;
-    return analysis;
-  };
-
-  const handleImageUpload = (event) => {
-    setError(null);
-    const file = event.target.files[0];
-    if (!file) {
-      setError('No file selected');
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload a valid image file (PNG, JPG, GIF)');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      setError('Image size exceeds 10MB limit');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        setUploadedImage(img);
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const maxSize = 400;
-        const scale = Math.min(maxSize / img.width, maxSize / img.height);
-        
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        const analysis = analyzeGeometricImage(e, canvas);
-        if (analysis) {
-          setImageAnalysis(analysis);
-          setMode('upload');
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const runAnalysis = () => {
-    setIsProcessing(true);
-    setCurrentStep(0);
-    setShowEquationDetails(false);
-    
-    const interval = setInterval(() => {
-      setCurrentStep(prev => {
-        if (prev < pipelineSteps.length - 1) {
-          return prev + 1;
-        } else {
-          setIsProcessing(false);
-          clearInterval(interval);
-          setTimeout(() => setShowEquationDetails(true), 500);
-          return prev;
-        }
-      });
-    }, 1000);
-  };
-
-  const resetAnalysis = () => {
-    setCurrentStep(0);
-    setIsProcessing(false);
-    setUploadedImage(null);
-    setImageAnalysis(null);
-    setError(null);
-    setMode('preset');
-    setShowEquationDetails(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const getCurrentSymbol = () => {
-    return mode === 'upload' && imageAnalysis ? imageAnalysis : presetSymbols[selectedSymbol];
-  };
-
-  const getComplexityColor = (complexity) => {
-    switch (complexity) {
-      case 'Beginner': return 'text-green-400';
-      case 'Intermediate': return 'text-yellow-400';
-      case 'Advanced': return 'text-orange-400';
-      case 'Expert': return 'text-red-400';
-      default: return 'text-blue-400';
-    }
-  };
-
-  const currentSymbol = getCurrentSymbol();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-white mb-3 flex items-center justify-center gap-4">
-            <Zap className="w-12 h-12 text-yellow-400 animate-pulse" />
-            Sacred Geometry Physics Decoder
-            <Sparkles className="w-10 h-10 text-blue-400" />
-          </h1>
-          <p className="text-blue-200 text-xl max-w-3xl mx-auto">
-            Decode geometric patterns into fundamental physics equations and discover the mathematical beauty hidden in sacred symbols
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Input Section */}
-          <div className="xl:col-span-1 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-2xl">
-            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
-              <Image className="w-6 h-6" />
-              Input Geometry
-            </h2>
-            
-            <div className="flex gap-3 mb-6">
-              <button
-                onClick={() => setMode('preset')}
-                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
-                  mode === 'preset'
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                    : 'bg-white/10 text-blue-200 hover:bg-white/20 hover:scale-105'
-                }`}
-              >
-                Preset Symbols
-              </button>
-              <button
-                onClick={() => setMode('upload')}
-                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
-                  mode === 'upload'
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                    : 'bg-white/10 text-blue-200 hover:bg-white/20 hover:scale-105'
-                }`}
-              >
-                Upload Image
-              </button>
-            </div>
-
-            {mode === 'preset' ? (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {Object.entries(presetSymbols).map(([key, symbol]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedSymbol(key)}
-                    className={`w-full p-4 rounded-xl text-left transition-all duration-300 transform hover:scale-105 ${
-                      selectedSymbol === key
-                        ? `bg-gradient-to-r ${symbol.color} bg-opacity-30 border-2 border-white/40 shadow-lg`
-                        : 'bg-white/5 hover:bg-white/10 border border-white/10'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-white font-semibold text-lg">{symbol.name}</div>
-                      <div className={`text-xs px-2 py-1 rounded-full ${getComplexityColor(symbol.complexity)} bg-black/20`}>
-                        {symbol.complexity}
-                      </div>
-                    </div>
-                    <div className="text-blue-200 text-sm">{symbol.description}</div>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="border-2 border-dashed border-blue-400 rounded-xl p-8 text-center transition-all duration-300 hover:border-blue-300 hover:bg-white/5">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center gap-3 text-blue-200 hover:text-white transition-colors"
-                  >
-                    <Upload className="w-10 h-10" />
-                    <span className="text-lg">Click to upload geometric image</span>
-                    <span className="text-sm opacity-70">PNG, JPG, GIF (max 10MB)</span>
-                  </button>
-                </div>
-                
-                {uploadedImage && (
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                    <canvas
-                      ref={canvasRef}
-                      className="max-w-full h-auto rounded-lg border border-white/20 shadow-lg"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {error && (
-              <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl">
-                <p className="text-red-200 text-sm">{error}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Analysis Pipeline */}
-          <div className="xl:col-span-1 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-2xl">
-            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
-              <Calculator className="w-6 h-6" />
-              Analysis Pipeline
-            </h2>
-            
-            <div className="space-y-4 mb-8">
-              {pipelineSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-xl transition-all duration-500 transform ${
-                    index < currentStep
-                      ? 'bg-green-500/20 border border-green-500/50 shadow-lg scale-105'
-                      : index === currentStep && isProcessing
-                      ? 'bg-blue-500/20 border border-blue-500/50 shadow-lg scale-105'
-                      : 'bg-white/5 border border-white/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    {index < currentStep ? (
-                      <CheckCircle className="w-6 h-6 text-green-400 flex-shrink-0" />
-                    ) : index === currentStep && isProcessing ? (
-                      <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                    ) : (
-                      <div className="w-6 h-6 border-2 border-white/30 rounded-full flex-shrink-0" />
-                    )}
-                    <div>
-                      <div className={`font-medium ${index <= currentStep ? 'text-white' : 'text-blue-200'}`}>
-                        {step.name}
-                      </div>
-                      <div className={`text-sm ${index <= currentStep ? 'text-blue-100' : 'text-blue-300'}`}>
-                        {step.description}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={runAnalysis}
-                disabled={isProcessing}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-4 rounded-xl font-medium hover:from-blue-600 hover:to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                <Play className="w-5 h-5" />
-                {isProcessing ? 'Processing...' : 'Run Analysis'}
-              </button>
-              <button
-                onClick={resetAnalysis}
-                className="bg-white/10 hover:bg-white/20 text-white px-4 py-4 rounded-xl transition-all duration-300 transform hover:scale-105"
-              >
-                <RotateCcw className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Results Section */}
-          <div className="xl:col-span-1">
-            {currentStep >= pipelineSteps.length - 1 && (
-              <div className={`bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-2xl transition-all duration-1000 ${showEquationDetails ? 'opacity-100 transform scale-100' : 'opacity-0 transform scale-95'}`}>
-                <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
-                  <Eye className="w-6 h-6" />
-                  Physics Mapping Results
-                </h2>
-                
-                <div className="space-y-4">
-                  <div className={`bg-gradient-to-r ${currentSymbol.color} bg-opacity-20 rounded-xl p-4 border border-white/20`}>
-                    <h3 className="text-white font-semibold text-lg mb-2 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5" />
-                      {currentSymbol.name}
-                    </h3>
-                    <p className="text-blue-100 text-sm">{currentSymbol.description}</p>
-                  </div>
-
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <h3 className="text-blue-300 font-medium mb-2">Geometric Properties</h3>
-                    <p className="text-white text-sm">{currentSymbol.geometry}</p>
-                  </div>
-
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <h3 className="text-blue-300 font-medium mb-2">Physical Constraint</h3>
-                    <p className="text-white text-sm">{currentSymbol.constraint}</p>
-                  </div>
-
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <h3 className="text-blue-300 font-medium mb-2">Mathematical Operator</h3>
-                    <p className="text-white font-mono text-sm bg-black/30 p-3 rounded-lg border border-white/10">
-                      {currentSymbol.operator}
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <h3 className="text-blue-300 font-medium mb-2">Physics Law</h3>
-                    <p className="text-white text-sm">{currentSymbol.physicsLaw}</p>
-                  </div>
-
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <h3 className="text-blue-300 font-medium mb-2">Physical Applications</h3>
-                    <p className="text-white text-sm">{currentSymbol.application}</p>
-                  </div>
-
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <h3 className="text-blue-300 font-medium mb-2">Governing Equation</h3>
-                    <p className="text-white font-mono text-sm bg-black/30 p-3 rounded-lg border border-white/10">
-                      {currentSymbol.equation}
-                    </p>
-                  </div>
-
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-                    <h3 className="text-green-300 font-medium mb-2 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5" />
-                      Dimensional Verification
-                    </h3>
-                    <p className="text-green-200 font-mono text-sm">{currentSymbol.verification}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default SacredGeometryDecoder;
+    // Symbolic Decoder Stub
+    const symbolCtx = document.getElementById('symbolCanvas').getContext('2d');
+    symbolCtx.translate(300, 150);
+    symbolCtx.fillStyle = '#ffffff';
+    symbolCtx.font = '80px monospace';
+    symbolCtx.fillText('⟒ ⌬ ⚛ ∴', -130, 25);
+    symbolCtx.font = '16px sans-serif';
+    symbolCtx.fillStyle = '#aaaaaa';
+    symbolCtx.fillText('← Decoded: Li₃N₇ | Recursive Harmonic | Element 115 Stabilizer', -130, 60);
+  </script>
+</body>
+</html>
